@@ -27,11 +27,15 @@ int main()
 
 	int socket_fd; 
 	struct sockaddr_in serveraddr;
-	connect_with_server(&socket_fd, &serveraddr);
+	
 
 
 	fd_set one;
 	fd_set two;
+	
+
+	connect_with_server(&socket_fd, &serveraddr);
+
 	FD_ZERO(&one);
 	FD_ZERO(&two);
 	FD_SET(0, &one);
@@ -44,11 +48,11 @@ int main()
 		two = one;
 		if(select(max+1, &two, NULL, NULL, NULL) == -1)
 		{
-			perror("Error in select");
+			printf("Error in select");
 			exit(4);
 		}
 
-		for(int i=0; i<max; i++)
+		for(int i=0; i<=max; i++)
 		{
 			if(FD_ISSET(i, &two))
 				sendandreceive(i, socket_fd);
@@ -64,40 +68,25 @@ int main()
 
 void connect_with_server(int *socket_fd, struct sockaddr_in *serveraddr)
 {
-	// if((*socket_fd = socket(AF_INET, SOCK_STREAM,0))<0)
-	// {
-	// 	printf("Error socket went WRONG");
-	// 	return -1;
-	// }
-
-	// serveraddr->sin_family = AF_INET;
-	// serveraddr->sin_port = htons(PORT);
-	// server_addr->sin_addr.s_addr = inet_addr("127.0.0.1");
-	// memset(&serveraddr, '0', sizeof(serveraddr));
-	// if(inet_pton(AF_INET, "127.0.0.1", &serveraddr->sin_addr)<=0)
-	// {
-	// 	printf("Invalid address not supported\n");
-	// 	return -1;
-	// }
-
-	// if(connect(*socket_fd,(struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0)
-	// {
-	// 	perror("Could not connect");
-	// 	exit(1);
-	// }
-
-
-	if ((*socket_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		perror("Socket");
-		exit(1);
+	if((*socket_fd = socket(AF_INET, SOCK_STREAM,0))<0)
+	{
+		printf("Error socket went WRONG");
+		return -1;
 	}
+
 	serveraddr->sin_family = AF_INET;
-	serveraddr->sin_port = htons(5000);
+	serveraddr->sin_port = htons(PORT);
 	serveraddr->sin_addr.s_addr = inet_addr("127.0.0.1");
-	memset(serveraddr->sin_zero, '\0', sizeof serveraddr->sin_zero);
-	
-	if(connect(*socket_fd, (struct sockaddr *)serveraddr, sizeof(struct sockaddr)) == -1) {
-		perror("connect");
+
+	if(inet_pton(AF_INET, "127.0.0.1", &serveraddr->sin_addr)<=0)
+	{
+		printf("Invalid address not supported\n");
+		return -1;
+	}
+
+	if(connect(*socket_fd,(struct sockaddr *)serveraddr, sizeof(struct sockaddr)) < 0)
+	{
+		printf("Could not connect");
 		exit(1);
 	}
 }
@@ -126,7 +115,7 @@ void sendandreceive(int var, int socket_fd)
 	else
 	{
 		no_of_bytes = recv(socket_fd, reciever, 3000, 0);
-		reciever[no_of_bytes] = NULL;
+		reciever[no_of_bytes] = '\0';
 		printf(reciever);
 		printf("\n");
 		fflush(stdout);
